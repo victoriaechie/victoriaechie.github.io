@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Abi, Go to Class!</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f8ff;
+      padding: 2em;
+    }
+
+    h1 {
+      color: #2c3e50;
+    }
+
+    .section {
+      margin: 2em 0;
+    }
+
+    .schedule ul,
+    .excuses ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .schedule li,
+    .excuses li {
+      background: #fff;
+      padding: 0.5em 1em;
+      margin: 0.3em 0;
+      border-radius: 6px;
+      box-shadow: 0 0 4px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+
+    .countdown {
+      font-size: 2em;
+      margin-top: 1em;
+      color: #e74c3c;
+    }
+
+    .motivation {
+      margin-top: 2em;
+      font-size: 1.2em;
+      color: #2ecc71;
+    }
+
+    .navigator button {
+      margin: 0.2em;
+      padding: 0.5em 1em;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .navigator button:hover {
+      background-color: #2980b9;
+    }
+
+    #randomExcuseDisplay {
+      font-size: 1.1em;
+      margin-top: 1em;
+      background: #fff3cd;
+      padding: 1em;
+      border-radius: 6px;
+      color: #856404;
+      display: none;
+    }
+
+    button.generate-excuse {
+      padding: 0.7em 1.5em;
+      background: #e67e22;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+      margin-top: 1em;
+      transition: background-color 0.3s ease;
+    }
+
+    button.generate-excuse:hover {
+      background: #d35400;
+    }
+  </style>
+</head>
+<body>
+  <h1>Abi, It's Time to Shine ☀️</h1>
+
+  <!-- Schedule Navigator -->
+  <div class="section navigator">
+    <h2>Pick a Day:</h2>
+    <div>
+      <button onclick="showSchedule('Monday')">Monday</button>
+      <button onclick="showSchedule('Tuesday')">Tuesday</button>
+      <button onclick="showSchedule('Wednesday')">Wednesday</button>
+      <button onclick="showSchedule('Thursday')">Thursday</button>
+      <button onclick="showSchedule('Friday')">Friday</button>
+    </div>
+  </div>
+
+  <!-- Schedule Display -->
+  <div class="section schedule">
+    <h2 id="dayTitle">Today's Classes:</h2>
+    <ul id="scheduleList"></ul>
+  </div>
+
+  <div class="countdown">
+    Time until next class: <span id="timer">Loading...</span>
+  </div>
+
+  <div class="motivation">
+    📣 Don’t be late, future legend! You’ve got this. 💪
+  </div>
+
+  <!-- Abi's Excuses Section -->
+  <div class="section excuses">
+    <h2>Abi's Excuses 🧠💭</h2>
+
+    <button class="generate-excuse" onclick="showRandomExcuse()">Give Me an Excuse</button>
+    <div id="randomExcuseDisplay"></div>
+
+    <ul id="excuseList">
+      <li>“My alarm didn’t go off.”</li>
+      <li>“I was manifesting productivity.”</li>
+      <li>“The bus betrayed me.”</li>
+      <li>“I couldn’t find matching socks.”</li>
+      <li>“I had to mentally prepare... for 2 hours.”</li>
+      <li>“I started a deep conversation with my cat.”</li>
+      <li>“My vibe wasn’t right yet.”</li>
+      <li>“I was time traveling in my dreams.”</li>
+      <li>“I got stuck in an existential crisis.”</li>
+      <li>“My coffee needed a second round.”</li>
+      <li>“I was rescuing a squirrel from danger.”</li>
+      <li>“The traffic was more like a parking lot.”</li>
+      <li>“My shoes were on strike.”</li>
+      <li>“I thought today was a holiday.”</li>
+      <li>“The WiFi was too slow to get ready on time.”</li>
+    </ul>
+  </div>
+
+  <!-- Alarm sound -->
+  <audio id="alarmSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
+
+  <script>
+    const weeklySchedule = {
+      Monday: ["9:00 AM – Math", "11:00 AM – Physics", "2:00 PM – Literature"],
+      Tuesday: ["10:00 AM – History", "1:00 PM – Biology"],
+      Wednesday: ["9:00 AM – Math", "12:00 PM – Chemistry"],
+      Thursday: ["11:00 AM – Philosophy", "3:00 PM – Art"],
+      Friday: ["8:00 AM – Economics", "10:00 AM – Music"]
+    };
+
+    const excuses = [
+      "“My alarm didn’t go off.”",
+      "“I was manifesting productivity.”",
+      "“The bus betrayed me.”",
+      "“I couldn’t find matching socks.”",
+      "“I had to mentally prepare... for 2 hours.”",
+      "“I started a deep conversation with my cat.”",
+      "“My vibe wasn’t right yet.”",
+      "“I was time traveling in my dreams.”",
+      "“I got stuck in an existential crisis.”",
+      "“My coffee needed a second round.”",
+      "“I was rescuing a squirrel from danger.”",
+      "“The traffic was more like a parking lot.”",
+      "“My shoes were on strike.”",
+      "“I thought today was a holiday.”",
+      "“The WiFi was too slow to get ready on time.”"
+    ];
+
+    let alarmPlayed = false;
+
+    function showSchedule(day) {
+      const scheduleList = document.getElementById("scheduleList");
+      const dayTitle = document.getElementById("dayTitle");
+      scheduleList.innerHTML = "";
+
+      dayTitle.textContent = `${day}'s Classes:`;
+
+      if (weeklySchedule[day]) {
+        weeklySchedule[day].forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          scheduleList.appendChild(li);
+        });
+      } else {
+        const li = document.createElement("li");
+        li.textContent = "No classes today! 🎉";
+        scheduleList.appendChild(li);
+      }
+    }
+
+    function getTodayName() {
+      const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const today = new Date().getDay();
+      return days[today];
+    }
+
+    function getNextClassTime() {
+      const now = new Date();
+      const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const todayIndex = now.getDay();
+
+      for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+        const dayIndex = (todayIndex + dayOffset) % 7;
+        const dayName = daysOfWeek[dayIndex];
+        const classes = weeklySchedule[dayName] || [];
+
+        for (let timeStr of classes) {
+          const timePart = timeStr.split("–")[0].trim();
+          const [time, period] = timePart.split(" ");
+          let [hours, minutes] = time.split(":").map(Number);
+          if (period === "PM" && hours < 12) hours += 12;
+          if (period === "AM" && hours === 12) hours = 0;
+
+          const classDate = new Date(now);
+          classDate.setDate(now.getDate() + dayOffset);
+          classDate.setHours(hours, minutes, 0, 0);
+
+          if (classDate > now) return classDate;
+        }
+      }
+
+      return null;
+    }
+
+    function updateTimer() {
+      const now = new Date();
+      const nextClass = getNextClassTime();
+      const timerDisplay = document.getElementById("timer");
+
+      if (!nextClass) {
+        timerDisplay.textContent = "No more classes this week 🎉";
+        alarmPlayed = false;
+        return;
+      }
+
+      const diff = nextClass - now;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      timerDisplay.textContent = `${hours}h ${minutes}m ${seconds}s`;
+
+      if (diff > 5 * 60 * 1000) {
+        alarmPlayed = false;
+      }
+
+      if (diff <= 5 * 60 * 1000 && !alarmPlayed) {
+        document.getElementById("alarmSound").play();
+        alarmPlayed = true;
+      }
+    }
+
+    function showRandomExcuse() {
+      const randomIndex = Math.floor(Math.random() * excuses.length);
+      const excuse = excuses[randomIndex];
+      const display = document.getElementById("randomExcuseDisplay");
+      display.textContent = excuse;
+      display.style.display = "block";
+    }
+
+    window.onload = () => {
+      const today = getTodayName();
+      if (weeklySchedule[today]) {
+        showSchedule(today);
+      } else {
+        document.getElementById("dayTitle").textContent = "No classes today!";
+        document.getElementById("scheduleList").innerHTML = "";
+      }
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    };
+  </script>
+</body>
+</html>
